@@ -7,7 +7,9 @@ Android-приложение для автоматического обнару�
 В репозитории настроен workflow `.github/workflows/build.yml`:
 
 - При каждом `push` или `pull_request` в ветку `main` / `master` (а также вручную во вкладке **Actions -> Run workflow**) запускаются тесты и сборка APK.
-- Готовый `app-debug.apk` можно скачать в разделе **Actions -> последний запуск -> Artifacts -> OTG-Drive-debug-apk**.
+- Скачать готовый APK можно двумя способами:
+  1. Напрямую без ZIP-архива в разделе **Releases -> Latest Build -> `OTG-Drive-debug.apk`** (рекомендуется для установки прямо с телефона).
+  2. В разделе **Actions -> последний запуск -> Artifacts -> `OTG-Drive-debug-apk`** (хранится без сжатия `compression-level: 0`).
 - Для подписи релизной сборки (`assembleRelease` / `bundleRelease` по тегу `v*` или ручному запуску) можно добавить секреты репозитория (`Settings -> Secrets and variables -> Actions`):
   - `RELEASE_KEYSTORE_BASE64` — ваш `.jks`-файл в base64 (алиас ключа `upload`)
   - `STORE_PASSWORD` — пароль хранилища

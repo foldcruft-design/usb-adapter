@@ -11,6 +11,9 @@ on:
       - master
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     name: Build & Test APK
@@ -64,12 +67,29 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --stacktrace
 
-      - name: Upload Debug APK
+      - name: Verify Debug APK integrity
+        run: |
+          python3 -m zipfile -t app/build/outputs/apk/debug/app-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk OTG-Drive-debug.apk
+
+      - name: Upload Debug APK (uncompressed archive)
         uses: actions/upload-artifact@v4
         with:
           name: OTG-Drive-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: OTG-Drive-debug.apk
+          compression-level: 0
           if-no-files-found: error
+
+      - name: Publish direct APK to Latest Release
+        if: ${{ github.event_name != 'pull_request' }}
+        continue-on-error: true
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Build
+          prerelease: true
+          make_latest: true
+          files: OTG-Drive-debug.apk
 
       - name: Upload test report
         if: always()
@@ -147,4 +167,5 @@ jobs:
           path: |
             app/build/outputs/apk/release/*.apk
             app/build/outputs/bundle/release/*.aab
+          compression-level: 0
           if-no-files-found: error

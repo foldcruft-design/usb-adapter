@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">OTG Drive</string>
+    <string name="nav_usb_drive">Флешка</string>
+    <string name="nav_phone_storage">Телефон</string>
+    <string name="nav_usb_hardware">USB Монитор</string>
+    <string name="usb_waiting_title">Подключите USB-флешку</string>
+    <string name="usb_waiting_subtitle">Вставьте флешку через OTG-адаптер. Приложение автоматически обнаружит накопитель и предложит открыть его содержимое.</string>
+    <string name="usb_detected_grant_title">Флешка обнаружена!</string>
+    <string name="usb_detected_grant_subtitle">Разрешите доступ к выбранному USB-накопителю один раз — далее он будет открываться автоматически.</string>
+    <string name="action_open_usb_drive">Открыть флешку</string>
+    <string name="action_pick_folder_manually">Выбрать накопитель вручную</string>
+    <string name="action_add_to_usb">Добавить</string>
+    <string name="action_refresh">Обновить</string>
+    <string name="cd_usb_hero_illustration">Иллюстрация подключения USB OTG флешки к смартфону</string>
+    <string name="cd_navigate_up">Назад в родительскую папку</string>
+    <string name="cd_search">Поиск файлов</string>
+    <string name="cd_sort">Сортировка</string>
+    <string name="cd_view_mode">Переключить вид списка и сетки</string>
+    <string name="cd_more_actions">Дополнительные действия</string>
+    <string name="cd_close">Закрыть</string>
+</resources>

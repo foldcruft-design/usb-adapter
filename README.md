@@ -1,11 +1,23 @@
-<div align="center">
+# OTG Drive
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Android-приложение для автоматического обнаружения USB-флешек через OTG-адаптер и управления файлами.
 
-  <h1>Built with AI Studio</h2>
+## Сборка через GitHub Actions
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+В репозитории настроен workflow `.github/workflows/build.yml`:
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+- При каждом `push` или `pull_request` в ветку `main` / `master` (а также вручную во вкладке **Actions -> Run workflow**) запускаются тесты и сборка APK.
+- Готовый `app-debug.apk` можно скачать в разделе **Actions -> последний запуск -> Artifacts -> OTG-Drive-debug-apk**.
+- Для подписи релизной сборки (`assembleRelease` / `bundleRelease` по тегу `v*` или ручному запуску) можно добавить секреты репозитория (`Settings -> Secrets and variables -> Actions`):
+  - `RELEASE_KEYSTORE_BASE64` — ваш `.jks`-файл в base64 (алиас ключа `upload`)
+  - `STORE_PASSWORD` — пароль хранилища
+  - `KEY_PASSWORD` — пароль ключа
 
-</div>
+## Локальная сборка
+
+```bash
+./gradlew :app:testDebugUnitTest
+./gradlew :app:assembleDebug
+```
+
+Готовый APK появится в `app/build/outputs/apk/debug/app-debug.apk`.

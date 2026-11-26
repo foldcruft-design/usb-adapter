@@ -1,0 +1,6 @@
+{
+  "name": "OTG Drive",
+  "description": "Полноценный USB OTG файловый менеджер с автоматическим обнаружением флешки, просмотром содержимого, добавлением файлов и управлением данными.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

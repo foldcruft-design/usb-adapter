@@ -1,6 +1,5 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,8 +23,7 @@ import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -35,6 +33,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -50,8 +49,13 @@ import com.example.model.RemovableVolumeInfo
 import com.example.model.SortField
 import com.example.model.SortOrder
 import com.example.model.UsbHardwareDevice
+import com.example.ui.components.LocalGlassBackdrop
+import com.example.ui.components.liquidGlass
 import com.example.ui.theme.EmeraldContainer
 import com.example.ui.theme.EmeraldReady
+import com.example.ui.theme.GraphitePrimary
+import com.example.ui.theme.InkCharcoal
+import com.example.ui.theme.InkSlateGray
 import com.example.ui.theme.WarmAmber
 import com.example.ui.theme.WarmAmberContainer
 import com.example.util.Formatters
@@ -70,6 +74,7 @@ fun UsbExplorerScreen(
     onPickManualTree: () -> Unit,
     onRequestUsbDevicePermission: (Int) -> Unit,
     onRefreshHardware: () -> Unit,
+    onQuickSendToPhone: (List<FileNode>?) -> Unit,
     onNavigateUp: () -> Unit,
     onCrumbClick: (Int) -> Unit,
     onSearchChange: (String) -> Unit,
@@ -103,6 +108,8 @@ fun UsbExplorerScreen(
             clipboard = clipboard,
             isUsb = true,
             statusBadge = "USB OTG подключён",
+            quickSendLabel = "Сохранить в буфер телефона",
+            onQuickSend = onQuickSendToPhone,
             onNavigateUp = onNavigateUp,
             onCrumbClick = onCrumbClick,
             onSearchChange = onSearchChange,
@@ -152,13 +159,14 @@ private fun UsbOnboardingOrGrantView(
     onRefreshHardware: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val backdrop = LocalGlassBackdrop.current
     val massStorageHardware = usbDevices.firstOrNull { it.hasMassStorageInterface } ?: usbDevices.firstOrNull()
 
     Box(
         modifier = modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp, vertical = 12.dp),
+            .padding(start = 18.dp, end = 18.dp, top = 8.dp, bottom = 120.dp),
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
@@ -166,148 +174,179 @@ private fun UsbOnboardingOrGrantView(
                 .fillMaxWidth()
                 .widthIn(max = 560.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Card(
-                shape = RoundedCornerShape(24.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlass(
+                        backdrop = backdrop,
+                        shape = RoundedCornerShape(28.dp),
+                        fillAlpha = 0.48f,
+                        blurRadius = 10.dp,
+                        useLens = true,
+                        refractionHeight = 16.dp,
+                        refractionAmount = 32.dp
+                    )
             ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    Image(
-                        painter = painterResource(id = R.drawable.img_usb_otg_hero_1795699847717),
-                        contentDescription = stringResource(R.string.cd_usb_hero_illustration),
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(190.dp)
-                            .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
-                    )
-                    Surface(
-                        shape = RoundedCornerShape(50),
-                        color = if (mountedVolume != null || massStorageHardware != null) EmeraldContainer else WarmAmberContainer,
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(12.dp)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Image(
+                            painter = painterResource(id = R.drawable.img_usb_otg_hero_1795699847717),
+                            contentDescription = stringResource(R.string.cd_usb_hero_illustration),
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp)
+                                .clip(RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp))
+                        )
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = if (mountedVolume != null || massStorageHardware != null) {
+                                EmeraldContainer.copy(alpha = 0.92f)
+                            } else {
+                                Color.White.copy(alpha = 0.85f)
+                            },
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .padding(12.dp)
                         ) {
-                            Box(
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (mountedVolume != null || massStorageHardware != null) EmeraldReady else WarmAmber
+                                        )
+                                )
+                                Text(
+                                    text = when {
+                                        mountedVolume != null -> "Том смонтирован"
+                                        massStorageHardware != null -> "USB обнаружен"
+                                        else -> "Ожидание OTG"
+                                    },
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = if (mountedVolume != null || massStorageHardware != null) EmeraldReady else InkCharcoal
+                                )
+                            }
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Text(
+                            text = if (mountedVolume != null) {
+                                stringResource(R.string.usb_detected_grant_title)
+                            } else {
+                                stringResource(R.string.usb_waiting_title)
+                            },
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = InkCharcoal
+                        )
+                        Text(
+                            text = if (mountedVolume != null) {
+                                "Обнаружен накопитель «${mountedVolume.description}». " +
+                                    stringResource(R.string.usb_detected_grant_subtitle)
+                            } else {
+                                stringResource(R.string.usb_waiting_subtitle)
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = InkSlateGray
+                        )
+
+                        if (mountedVolume != null) {
+                            Button(
+                                onClick = { onGrantVolumeAccess(mountedVolume) },
                                 modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(if (mountedVolume != null || massStorageHardware != null) EmeraldReady else WarmAmber)
-                            )
-                            Text(
-                                text = when {
-                                    mountedVolume != null -> "Том смонтирован"
-                                    massStorageHardware != null -> "USB обнаружен"
-                                    else -> "Ожидание OTG"
-                                },
-                                style = MaterialTheme.typography.labelSmall,
-                                color = if (mountedVolume != null || massStorageHardware != null) EmeraldReady else WarmAmber
-                            )
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .testTag("grant_usb_access_button"),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = GraphitePrimary,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Icon(Icons.Default.Usb, contentDescription = null)
+                                Spacer(Modifier.size(8.dp))
+                                Text(stringResource(R.string.action_open_usb_drive))
+                            }
+                        } else {
+                            Button(
+                                onClick = onPickManualTree,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(52.dp)
+                                    .testTag("pick_manual_usb_button"),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = GraphitePrimary,
+                                    contentColor = Color.White
+                                )
+                            ) {
+                                Icon(Icons.Default.FolderOpen, contentDescription = null)
+                                Spacer(Modifier.size(8.dp))
+                                Text(stringResource(R.string.action_pick_folder_manually))
+                            }
                         }
-                    }
-                }
 
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = if (mountedVolume != null) {
-                            stringResource(R.string.usb_detected_grant_title)
-                        } else {
-                            stringResource(R.string.usb_waiting_title)
-                        },
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = if (mountedVolume != null) {
-                            "Обнаружен накопитель «${mountedVolume.description}». " +
-                                stringResource(R.string.usb_detected_grant_subtitle)
-                        } else {
-                            stringResource(R.string.usb_waiting_subtitle)
-                        },
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    if (mountedVolume != null) {
-                        Button(
-                            onClick = { onGrantVolumeAccess(mountedVolume) },
+                        OutlinedButton(
+                            onClick = onRefreshHardware,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(52.dp)
-                                .testTag("grant_usb_access_button"),
-                            shape = RoundedCornerShape(14.dp)
+                                .height(48.dp)
+                                .testTag("refresh_usb_hardware_button"),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.outlinedButtonColors(contentColor = InkCharcoal)
                         ) {
-                            Icon(Icons.Default.Usb, contentDescription = null)
+                            Icon(Icons.Default.Refresh, contentDescription = null)
                             Spacer(Modifier.size(8.dp))
-                            Text(stringResource(R.string.action_open_usb_drive))
+                            Text("Проверить подключение USB")
                         }
-                    } else {
-                        Button(
-                            onClick = onPickManualTree,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(52.dp)
-                                .testTag("pick_manual_usb_button"),
-                            shape = RoundedCornerShape(14.dp)
-                        ) {
-                            Icon(Icons.Default.FolderOpen, contentDescription = null)
-                            Spacer(Modifier.size(8.dp))
-                            Text(stringResource(R.string.action_pick_folder_manually))
-                        }
-                    }
-
-                    OutlinedButton(
-                        onClick = onRefreshHardware,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp)
-                            .testTag("refresh_usb_hardware_button"),
-                        shape = RoundedCornerShape(14.dp)
-                    ) {
-                        Icon(Icons.Default.Refresh, contentDescription = null)
-                        Spacer(Modifier.size(8.dp))
-                        Text("Проверить подключение USB")
                     }
                 }
             }
 
             if (massStorageHardware != null) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(18.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.65f)),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.45f))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlass(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(22.dp),
+                            fillAlpha = 0.48f,
+                            blurRadius = 8.dp,
+                            useLens = true
+                        )
+                        .padding(16.dp)
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Memory,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
+                            tint = InkCharcoal,
                             modifier = Modifier.size(30.dp)
                         )
                         Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                             Text(
                                 text = massStorageHardware.productName,
-                                style = MaterialTheme.typography.titleMedium
+                                style = MaterialTheme.typography.titleMedium,
+                                color = InkCharcoal
                             )
                             Text(
                                 text = "${massStorageHardware.manufacturerName} • ${Formatters.formatUsbIds(massStorageHardware.vendorId, massStorageHardware.productId)}",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = InkSlateGray
                             )
                             Text(
                                 text = if (massStorageHardware.hasPermission) "USB-доступ подтверждён" else "Требуется USB-разрешение",
@@ -317,7 +356,8 @@ private fun UsbOnboardingOrGrantView(
                         }
                         if (!massStorageHardware.hasPermission) {
                             OutlinedButton(
-                                onClick = { onRequestUsbDevicePermission(massStorageHardware.deviceId) }
+                                onClick = { onRequestUsbDevicePermission(massStorageHardware.deviceId) },
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = InkCharcoal)
                             ) {
                                 Text("Доступ")
                             }
@@ -326,31 +366,34 @@ private fun UsbOnboardingOrGrantView(
                 }
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlass(
+                        backdrop = backdrop,
+                        shape = RoundedCornerShape(22.dp),
+                        fillAlpha = 0.40f,
+                        blurRadius = 6.dp,
+                        useLens = false
+                    )
+                    .padding(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     Text(
                         text = "Как работает автоопределение OTG",
                         style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary
+                        color = InkCharcoal
                     )
                     Text(
                         text = "1. Вставьте флешку в OTG-адаптер и подключите к телефону.\n" +
                             "2. Система автоматически предложит открыть OTG Drive.\n" +
                             "3. Выдайте доступ к флешке один раз — далее все файлы, фото и документы можно просматривать, редактировать и переносить напрямую.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = InkSlateGray,
                         textAlign = TextAlign.Start
                     )
                 }
             }
-            Spacer(Modifier.height(16.dp))
         }
     }
 }

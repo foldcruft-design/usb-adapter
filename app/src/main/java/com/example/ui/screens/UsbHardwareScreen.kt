@@ -1,7 +1,7 @@
 package com.example.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -20,8 +20,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SdStorage
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,14 +31,21 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.example.model.EventLevel
 import com.example.model.RemovableVolumeInfo
 import com.example.model.UsbEventLogEntry
 import com.example.model.UsbHardwareDevice
+import com.example.ui.components.LocalGlassBackdrop
+import com.example.ui.components.liquidGlass
 import com.example.ui.theme.EmeraldContainer
 import com.example.ui.theme.EmeraldReady
+import com.example.ui.theme.GraphitePrimary
+import com.example.ui.theme.InkCharcoal
+import com.example.ui.theme.InkSlateGray
 import com.example.ui.theme.WarmAmber
 import com.example.ui.theme.WarmAmberContainer
 import com.example.util.Formatters
@@ -55,32 +61,47 @@ fun UsbHardwareScreen(
     onUnlinkVolume: (RemovableVolumeInfo) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val backdrop = LocalGlassBackdrop.current
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(16.dp),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 140.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         item {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Column {
-                    Text("USB OTG Монитор", style = MaterialTheme.typography.headlineSmall)
-                    Text(
-                        "Диагностика адаптера, устройств и томов",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlass(
+                        backdrop = backdrop,
+                        shape = RoundedCornerShape(22.dp),
+                        fillAlpha = 0.48f,
+                        blurRadius = 8.dp,
+                        useLens = true
                     )
-                }
-                IconButton(
-                    onClick = onRefresh,
-                    modifier = Modifier
-                        .minimumInteractiveComponentSize()
-                        .testTag("hardware_refresh_button")
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Обновить")
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("USB OTG Монитор", style = MaterialTheme.typography.headlineSmall, color = InkCharcoal)
+                        Text(
+                            "Диагностика адаптера, устройств и томов",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = InkSlateGray
+                        )
+                    }
+                    IconButton(
+                        onClick = onRefresh,
+                        modifier = Modifier
+                            .minimumInteractiveComponentSize()
+                            .testTag("hardware_refresh_button")
+                    ) {
+                        Icon(Icons.Default.Refresh, contentDescription = "Обновить", tint = InkCharcoal)
+                    }
                 }
             }
         }
@@ -89,7 +110,7 @@ fun UsbHardwareScreen(
             Text(
                 text = "Съёмные тома (${removableVolumes.size})",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = InkCharcoal
             )
         }
 
@@ -103,16 +124,19 @@ fun UsbHardwareScreen(
             }
         } else {
             items(removableVolumes, key = { it.key }) { vol ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlass(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(20.dp),
+                            fillAlpha = 0.46f,
+                            blurRadius = 8.dp,
+                            useLens = true
+                        )
+                        .padding(14.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -123,13 +147,13 @@ fun UsbHardwareScreen(
                                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 modifier = Modifier.weight(1f)
                             ) {
-                                Icon(Icons.Default.SdStorage, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.SdStorage, contentDescription = null, tint = InkCharcoal)
                                 Column {
-                                    Text(vol.description, style = MaterialTheme.typography.titleMedium)
+                                    Text(vol.description, style = MaterialTheme.typography.titleMedium, color = InkCharcoal)
                                     Text(
                                         text = "UUID: ${vol.uuid ?: "—"} • ${vol.state}",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        color = InkSlateGray
                                     )
                                 }
                             }
@@ -150,19 +174,26 @@ fun UsbHardwareScreen(
                             Text(
                                 text = "Свободно ${Formatters.formatBytes(vol.freeBytes)} из ${Formatters.formatBytes(vol.totalBytes)}",
                                 style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = InkSlateGray
                             )
                         }
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             Button(
                                 onClick = { onGrantOrOpenVolume(vol) },
-                                enabled = vol.isMounted
+                                enabled = vol.isMounted,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = GraphitePrimary,
+                                    contentColor = Color.White
+                                )
                             ) {
                                 Text(if (vol.persistedTreeUri != null) "Открыть в менеджере" else "Выдать доступ")
                             }
                             if (vol.persistedTreeUri != null) {
-                                OutlinedButton(onClick = { onUnlinkVolume(vol) }) {
+                                OutlinedButton(
+                                    onClick = { onUnlinkVolume(vol) },
+                                    colors = ButtonDefaults.outlinedButtonColors(contentColor = InkCharcoal)
+                                ) {
                                     Icon(Icons.Default.LinkOff, contentDescription = null, modifier = Modifier.size(16.dp))
                                     Spacer(Modifier.size(4.dp))
                                     Text("Сбросить")
@@ -178,7 +209,7 @@ fun UsbHardwareScreen(
             Text(
                 text = "USB-устройства (UsbManager: ${usbDevices.size})",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = InkCharcoal
             )
         }
 
@@ -192,34 +223,37 @@ fun UsbHardwareScreen(
             }
         } else {
             items(usbDevices, key = { it.deviceId }) { dev ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.45f))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlass(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(20.dp),
+                            fillAlpha = 0.46f,
+                            blurRadius = 8.dp,
+                            useLens = true
+                        )
+                        .padding(14.dp)
                 ) {
-                    Column(
-                        modifier = Modifier.padding(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Icon(Icons.Default.Memory, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                            Icon(Icons.Default.Memory, contentDescription = null, tint = InkCharcoal)
                             Column(modifier = Modifier.weight(1f)) {
-                                Text(dev.productName, style = MaterialTheme.typography.titleMedium)
+                                Text(dev.productName, style = MaterialTheme.typography.titleMedium, color = InkCharcoal)
                                 Text(
                                     dev.manufacturerName,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = InkSlateGray
                                 )
                             }
                         }
                         Text(
                             text = "${Formatters.formatUsbIds(dev.vendorId, dev.productId)} • Интерфейсов: ${dev.interfaceCount}",
                             style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            color = InkCharcoal
                         )
                         Text(
                             text = if (dev.hasMassStorageInterface) {
@@ -228,10 +262,13 @@ fun UsbHardwareScreen(
                                 Formatters.describeUsbClass(dev.deviceClass)
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = InkSlateGray
                         )
                         if (!dev.hasPermission) {
-                            OutlinedButton(onClick = { onRequestUsbPermission(dev.deviceId) }) {
+                            OutlinedButton(
+                                onClick = { onRequestUsbPermission(dev.deviceId) },
+                                colors = ButtonDefaults.outlinedButtonColors(contentColor = InkCharcoal)
+                            ) {
                                 Text("Запросить USB-разрешение")
                             }
                         }
@@ -244,7 +281,7 @@ fun UsbHardwareScreen(
             Text(
                 text = "Журнал событий OTG",
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.primary
+                color = InkCharcoal
             )
         }
 
@@ -252,15 +289,21 @@ fun UsbHardwareScreen(
             val badgeColor = when (entry.level) {
                 EventLevel.SUCCESS -> EmeraldReady
                 EventLevel.WARNING -> WarmAmber
-                EventLevel.INFO -> MaterialTheme.colorScheme.primary
+                EventLevel.INFO -> InkCharcoal
             }
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .liquidGlass(
+                        backdrop = backdrop,
+                        shape = RoundedCornerShape(16.dp),
+                        fillAlpha = 0.40f,
+                        blurRadius = 5.dp,
+                        useLens = false
+                    )
+                    .padding(horizontal = 12.dp, vertical = 10.dp)
             ) {
                 Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
@@ -270,11 +313,11 @@ fun UsbHardwareScreen(
                         color = badgeColor
                     )
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(entry.title, style = MaterialTheme.typography.titleSmall)
+                        Text(entry.title, style = MaterialTheme.typography.titleSmall, color = InkCharcoal)
                         Text(
                             entry.detail,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = InkSlateGray
                         )
                     }
                 }
@@ -285,24 +328,31 @@ fun UsbHardwareScreen(
 
 @Composable
 private fun EmptyHardwareCard(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    icon: ImageVector,
     title: String,
     subtitle: String
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f))
+    val backdrop = LocalGlassBackdrop.current
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .liquidGlass(
+                backdrop = backdrop,
+                shape = RoundedCornerShape(20.dp),
+                fillAlpha = 0.42f,
+                blurRadius = 6.dp,
+                useLens = false
+            )
+            .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier.padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(icon, contentDescription = null, tint = InkSlateGray)
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                Text(title, style = MaterialTheme.typography.titleSmall)
-                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(title, style = MaterialTheme.typography.titleSmall, color = InkCharcoal)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = InkSlateGray)
             }
         }
     }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
@@ -77,9 +78,17 @@ import coil.request.ImageRequest
 import com.example.model.FileNode
 import com.example.model.SortField
 import com.example.model.SortOrder
+import com.example.ui.components.LocalChromeBackdrop
+import com.example.ui.components.liquidGlass
+import com.example.ui.theme.CoralDanger
+import com.example.ui.theme.GraphitePrimary
+import com.example.ui.theme.InkCharcoal
+import com.example.ui.theme.InkSlateGray
 import com.example.ui.theme.JetBrainsMonoFontFamily
 import com.example.util.Formatters
 import com.example.viewmodel.TextViewerState
+
+private val GlassSheetColor = Color(0xFFF2F4F8)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,7 +100,10 @@ fun AddActionBottomSheet(
     onCreateTextFile: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = GlassSheetColor
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -102,6 +114,7 @@ fun AddActionBottomSheet(
             Text(
                 text = "Добавить в «$targetLabel»",
                 style = MaterialTheme.typography.titleLarge,
+                color = InkCharcoal,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
             )
             SheetOptionItem(
@@ -118,7 +131,7 @@ fun AddActionBottomSheet(
                 onClick = { onDismiss(); onPickDocuments() },
                 tag = "add_files_option"
             )
-            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = Color(0xFFD5DBE4))
             SheetOptionItem(
                 icon = Icons.Default.CreateNewFolder,
                 title = "Создать папку",
@@ -142,6 +155,8 @@ fun AddActionBottomSheet(
 @Composable
 fun NodeActionSheet(
     node: FileNode,
+    quickSendLabel: String?,
+    onQuickSend: () -> Unit,
     onOpen: () -> Unit,
     onOpenExternal: () -> Unit,
     onShare: () -> Unit,
@@ -152,7 +167,10 @@ fun NodeActionSheet(
     onDelete: () -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = GlassSheetColor
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -162,16 +180,24 @@ fun NodeActionSheet(
             Text(
                 text = node.name,
                 style = MaterialTheme.typography.titleLarge,
+                color = InkCharcoal,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
             Text(
                 text = if (node.isDirectory) "Папка" else "${Formatters.formatBytes(node.sizeBytes)} • ${node.mimeType}",
                 style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = InkSlateGray,
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
 
+            if (quickSendLabel != null) {
+                SheetOptionItem(
+                    icon = Icons.AutoMirrored.Filled.Send,
+                    title = quickSendLabel,
+                    onClick = { onDismiss(); onQuickSend() }
+                )
+            }
             SheetOptionItem(
                 icon = Icons.AutoMirrored.Filled.OpenInNew,
                 title = if (node.isDirectory) "Открыть папку" else "Открыть / Просмотр",
@@ -215,7 +241,7 @@ fun NodeActionSheet(
                 SheetOptionItem(
                     icon = Icons.Default.Delete,
                     title = "Удалить",
-                    tint = MaterialTheme.colorScheme.error,
+                    tint = CoralDanger,
                     onClick = { onDismiss(); onDelete() }
                 )
             }
@@ -229,7 +255,7 @@ private fun SheetOptionItem(
     icon: ImageVector,
     title: String,
     subtitle: String? = null,
-    tint: Color = MaterialTheme.colorScheme.onSurface,
+    tint: Color = InkCharcoal,
     tag: String? = null,
     onClick: () -> Unit
 ) {
@@ -246,7 +272,7 @@ private fun SheetOptionItem(
             Text(text = title, color = tint, style = MaterialTheme.typography.titleMedium)
         },
         supportingContent = subtitle?.let {
-            { Text(text = it, style = MaterialTheme.typography.bodySmall) }
+            { Text(text = it, style = MaterialTheme.typography.bodySmall, color = InkSlateGray) }
         }
     )
 }
@@ -259,7 +285,10 @@ fun SortOptionsSheet(
     onSelect: (SortField, SortOrder) -> Unit,
     onDismiss: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = onDismiss) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = GlassSheetColor
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -267,7 +296,7 @@ fun SortOptionsSheet(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Сортировка", style = MaterialTheme.typography.titleLarge)
+            Text("Сортировка", style = MaterialTheme.typography.titleLarge, color = InkCharcoal)
             SortField.entries.forEach { field ->
                 Row(
                     modifier = Modifier
@@ -286,10 +315,10 @@ fun SortOptionsSheet(
                             onDismiss()
                         }
                     )
-                    Text(field.label, style = MaterialTheme.typography.bodyLarge)
+                    Text(field.label, style = MaterialTheme.typography.bodyLarge, color = InkCharcoal)
                 }
             }
-            HorizontalDivider()
+            HorizontalDivider(color = Color(0xFFD5DBE4))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -328,7 +357,8 @@ fun CreateFolderDialog(
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Новая папка") },
+        containerColor = GlassSheetColor,
+        title = { Text("Новая папка", color = InkCharcoal) },
         text = {
             OutlinedTextField(
                 value = name,
@@ -344,13 +374,14 @@ fun CreateFolderDialog(
             Button(
                 onClick = { onConfirm(name) },
                 enabled = name.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = GraphitePrimary, contentColor = Color.White),
                 modifier = Modifier.testTag("confirm_create_folder")
             ) {
                 Text("Создать")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text("Отмена", color = InkSlateGray) }
         }
     )
 }
@@ -364,7 +395,8 @@ fun CreateTextFileDialog(
     var content by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Новый текстовый файл") },
+        containerColor = GlassSheetColor,
+        title = { Text("Новый текстовый файл", color = InkCharcoal) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
@@ -387,13 +419,14 @@ fun CreateTextFileDialog(
         confirmButton = {
             Button(
                 onClick = { onConfirm(name, content) },
-                enabled = name.isNotBlank()
+                enabled = name.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = GraphitePrimary, contentColor = Color.White)
             ) {
                 Text("Сохранить")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text("Отмена", color = InkSlateGray) }
         }
     )
 }
@@ -407,7 +440,8 @@ fun RenameNodeDialog(
     var name by remember(node) { mutableStateOf(node.name) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Переименовать") },
+        containerColor = GlassSheetColor,
+        title = { Text("Переименовать", color = InkCharcoal) },
         text = {
             OutlinedTextField(
                 value = name,
@@ -420,13 +454,14 @@ fun RenameNodeDialog(
         confirmButton = {
             Button(
                 onClick = { onConfirm(name) },
-                enabled = name.isNotBlank() && name != node.name
+                enabled = name.isNotBlank() && name != node.name,
+                colors = ButtonDefaults.buttonColors(containerColor = GraphitePrimary, contentColor = Color.White)
             ) {
                 Text("Сохранить")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text("Отмена", color = InkSlateGray) }
         }
     )
 }
@@ -444,20 +479,21 @@ fun DeleteConfirmDialog(
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Удалить?") },
+        containerColor = GlassSheetColor,
+        title = { Text("Удалить?", color = InkCharcoal) },
         text = {
-            Text("Вы действительно хотите удалить $label? Действие необратимо.")
+            Text("Вы действительно хотите удалить $label? Действие необратимо.", color = InkSlateGray)
         },
         confirmButton = {
             Button(
                 onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                colors = ButtonDefaults.buttonColors(containerColor = CoralDanger, contentColor = Color.White)
             ) {
                 Text("Удалить")
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("Отмена") }
+            TextButton(onClick = onDismiss) { Text("Отмена", color = InkSlateGray) }
         }
     )
 }
@@ -469,7 +505,8 @@ fun PropertiesDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Свойства") },
+        containerColor = GlassSheetColor,
+        title = { Text("Свойства", color = InkCharcoal) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 PropLine("Имя", node.name)
@@ -483,7 +520,7 @@ fun PropertiesDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) { Text("Закрыть") }
+            TextButton(onClick = onDismiss) { Text("Закрыть", color = InkCharcoal) }
         }
     )
 }
@@ -491,8 +528,8 @@ fun PropertiesDialog(
 @Composable
 private fun PropLine(label: String, value: String) {
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Text(value, style = MaterialTheme.typography.bodyMedium)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = InkSlateGray)
+        Text(value, style = MaterialTheme.typography.bodyMedium, color = InkCharcoal)
     }
 }
 
@@ -506,6 +543,7 @@ fun ImagePreviewDialog(
     var scale by remember { mutableFloatStateOf(1f) }
     var offsetX by remember { mutableFloatStateOf(0f) }
     var offsetY by remember { mutableFloatStateOf(0f) }
+    val chromeBackdrop = LocalChromeBackdrop.current
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -514,7 +552,7 @@ fun ImagePreviewDialog(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black)
+                .background(Color(0xFF141518))
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
@@ -548,11 +586,17 @@ fun ImagePreviewDialog(
                     )
             )
 
-            Surface(
-                color = Color.Black.copy(alpha = 0.65f),
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(12.dp)
                     .align(Alignment.TopCenter)
+                    .liquidGlass(
+                        backdrop = chromeBackdrop,
+                        shape = RoundedCornerShape(22.dp),
+                        fillAlpha = 0.65f,
+                        useLens = true
+                    )
             ) {
                 Row(
                     modifier = Modifier
@@ -561,17 +605,17 @@ fun ImagePreviewDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onDismiss, modifier = Modifier.minimumInteractiveComponentSize()) {
-                        Icon(Icons.Default.Close, contentDescription = "Закрыть", tint = Color.White)
+                        Icon(Icons.Default.Close, contentDescription = "Закрыть", tint = InkCharcoal)
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(node.name, color = Color.White, style = MaterialTheme.typography.titleMedium, maxLines = 1)
-                        Text(Formatters.formatBytes(node.sizeBytes), color = Color.White.copy(alpha = 0.7f), style = MaterialTheme.typography.labelSmall)
+                        Text(node.name, color = InkCharcoal, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                        Text(Formatters.formatBytes(node.sizeBytes), color = InkSlateGray, style = MaterialTheme.typography.labelSmall)
                     }
                     IconButton(onClick = onShare, modifier = Modifier.minimumInteractiveComponentSize()) {
-                        Icon(Icons.Default.Share, contentDescription = "Поделиться", tint = Color.White)
+                        Icon(Icons.Default.Share, contentDescription = "Поделиться", tint = InkCharcoal)
                     }
                     IconButton(onClick = onOpenExternal, modifier = Modifier.minimumInteractiveComponentSize()) {
-                        Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Открыть через", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.OpenInNew, contentDescription = "Открыть через", tint = InkCharcoal)
                     }
                 }
             }
@@ -598,25 +642,25 @@ fun TextViewerDialog(
                 .statusBarsPadding()
                 .navigationBarsPadding()
                 .imePadding(),
-            color = MaterialTheme.colorScheme.background
+            color = Color(0xFFF1F3F7)
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface)
+                        .background(Color.White.copy(alpha = 0.75f))
                         .padding(horizontal = 8.dp, vertical = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onDismiss, modifier = Modifier.minimumInteractiveComponentSize()) {
-                        Icon(Icons.Default.Close, contentDescription = "Закрыть")
+                        Icon(Icons.Default.Close, contentDescription = "Закрыть", tint = InkCharcoal)
                     }
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(state.node.name, style = MaterialTheme.typography.titleMedium, maxLines = 1)
+                        Text(state.node.name, style = MaterialTheme.typography.titleMedium, color = InkCharcoal, maxLines = 1)
                         Text(
                             text = if (isEditing) "Редактирование" else "Просмотр • ${Formatters.formatBytes(state.node.sizeBytes)}",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = InkSlateGray
                         )
                     }
                     if (!state.isLoading && state.error == null && state.node.canWrite) {
@@ -629,29 +673,29 @@ fun TextViewerDialog(
                                 enabled = !state.isSaving,
                                 modifier = Modifier.minimumInteractiveComponentSize()
                             ) {
-                                Icon(Icons.Default.Save, contentDescription = "Сохранить", tint = MaterialTheme.colorScheme.primary)
+                                Icon(Icons.Default.Save, contentDescription = "Сохранить", tint = InkCharcoal)
                             }
                         } else {
                             IconButton(
                                 onClick = { isEditing = true },
                                 modifier = Modifier.minimumInteractiveComponentSize()
                             ) {
-                                Icon(Icons.Default.Edit, contentDescription = "Редактировать")
+                                Icon(Icons.Default.Edit, contentDescription = "Редактировать", tint = InkCharcoal)
                             }
                         }
                     }
                 }
-                HorizontalDivider()
+                HorizontalDivider(color = Color(0xFFD5DBE4))
 
                 Box(modifier = Modifier.weight(1f).fillMaxWidth().padding(14.dp)) {
                     when {
                         state.isLoading -> {
-                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = GraphitePrimary)
                         }
                         state.error != null -> {
                             Text(
                                 text = state.error,
-                                color = MaterialTheme.colorScheme.error,
+                                color = CoralDanger,
                                 style = MaterialTheme.typography.bodyLarge,
                                 modifier = Modifier.align(Alignment.Center)
                             )
@@ -661,15 +705,18 @@ fun TextViewerDialog(
                                 value = draft,
                                 onValueChange = { draft = it },
                                 modifier = Modifier.fillMaxSize(),
-                                textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = JetBrainsMonoFontFamily),
-                                shape = RoundedCornerShape(12.dp)
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = JetBrainsMonoFontFamily,
+                                    color = InkCharcoal
+                                ),
+                                shape = RoundedCornerShape(14.dp)
                             )
                         }
                         else -> {
                             Text(
                                 text = state.content.ifEmpty { "(Пустой файл)" },
                                 style = MaterialTheme.typography.bodyMedium.copy(fontFamily = JetBrainsMonoFontFamily),
-                                color = MaterialTheme.colorScheme.onBackground,
+                                color = InkCharcoal,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .verticalScroll(rememberScrollState())

@@ -1,5 +1,6 @@
 package com.example.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -7,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,16 +16,20 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.Button
-import androidx.compose.material3.FilterChip
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.data.OtgUserPreferences
 import com.example.model.ClipboardMode
@@ -32,18 +38,25 @@ import com.example.model.FileNode
 import com.example.model.PhoneRootMode
 import com.example.model.SortField
 import com.example.model.SortOrder
+import com.example.ui.components.LocalGlassBackdrop
+import com.example.ui.components.liquidGlass
+import com.example.ui.theme.GraphitePrimary
+import com.example.ui.theme.InkCharcoal
+import com.example.ui.theme.InkSlateGray
 import com.example.viewmodel.BrowserPaneState
 
 @Composable
 fun PhoneExplorerScreen(
     paneState: BrowserPaneState,
     phoneRootMode: PhoneRootMode,
+    isUsbConnected: Boolean,
     preferences: OtgUserPreferences,
     clipboard: ClipboardState,
     showAddSheet: Boolean,
     onDismissAddSheet: () -> Unit,
     onSwitchPhoneMode: (PhoneRootMode) -> Unit,
     onPickPhoneSafFolder: () -> Unit,
+    onQuickSendToUsb: (List<FileNode>?) -> Unit,
     onNavigateUp: () -> Unit,
     onCrumbClick: (Int) -> Unit,
     onSearchChange: (String) -> Unit,
@@ -68,6 +81,8 @@ fun PhoneExplorerScreen(
     onPickDocuments: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val backdrop = LocalGlassBackdrop.current
+
     Column(modifier = modifier.fillMaxSize()) {
         Row(
             modifier = Modifier
@@ -76,31 +91,50 @@ fun PhoneExplorerScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            FilterChip(
+            GlassModePill(
+                icon = Icons.Default.Smartphone,
+                label = "OTG Буфер",
                 selected = phoneRootMode == PhoneRootMode.WORKSPACE,
                 onClick = { onSwitchPhoneMode(PhoneRootMode.WORKSPACE) },
-                label = { Text("OTG Буфер") },
-                leadingIcon = {
-                    Icon(Icons.Default.Smartphone, contentDescription = null, modifier = Modifier.size(16.dp))
-                },
-                modifier = Modifier.testTag("phone_workspace_chip")
+                backdrop = backdrop,
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("phone_workspace_chip")
             )
-            FilterChip(
+            GlassModePill(
+                icon = Icons.Default.FolderOpen,
+                label = "Папка телефона",
                 selected = phoneRootMode == PhoneRootMode.SAF_FOLDER,
                 onClick = { onSwitchPhoneMode(PhoneRootMode.SAF_FOLDER) },
-                label = { Text("Папка телефона") },
-                leadingIcon = {
-                    Icon(Icons.Default.FolderOpen, contentDescription = null, modifier = Modifier.size(16.dp))
-                },
-                modifier = Modifier.testTag("phone_saf_chip")
+                backdrop = backdrop,
+                modifier = Modifier
+                    .weight(1f)
+                    .testTag("phone_saf_chip")
             )
             if (phoneRootMode == PhoneRootMode.SAF_FOLDER && paneState.rootTreeUri != null) {
-                Spacer(Modifier.weight(1f))
-                OutlinedButton(
-                    onClick = onPickPhoneSafFolder,
-                    shape = RoundedCornerShape(10.dp)
+                val changeShape = RoundedCornerShape(16.dp)
+                Box(
+                    modifier = Modifier
+                        .height(48.dp)
+                        .liquidGlass(
+                            backdrop = backdrop,
+                            shape = changeShape,
+                            fillAlpha = 0.45f,
+                            blurRadius = 6.dp,
+                            useLens = false
+                        )
+                        .clip(changeShape)
+                        .clickable(onClick = onPickPhoneSafFolder)
+                        .padding(horizontal = 12.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Text("Сменить")
+                    Text(
+                        text = "Сменить",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = InkCharcoal,
+                        maxLines = 1,
+                        softWrap = false
+                    )
                 }
             }
         }
@@ -109,35 +143,58 @@ fun PhoneExplorerScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(24.dp),
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .liquidGlass(
+                            backdrop = backdrop,
+                            shape = RoundedCornerShape(28.dp),
+                            fillAlpha = 0.50f,
+                            blurRadius = 10.dp,
+                            useLens = true
+                        )
+                        .padding(24.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.FolderOpen,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(56.dp)
-                    )
-                    Text(
-                        text = "Выберите папку телефона",
-                        style = MaterialTheme.typography.headlineSmall
-                    )
-                    Text(
-                        text = "Подключите «Загрузки», «Документы» или любую папку на телефоне для прямого переноса файлов на USB-флешку.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center
-                    )
-                    Button(
-                        onClick = onPickPhoneSafFolder,
-                        shape = RoundedCornerShape(14.dp),
-                        modifier = Modifier.testTag("pick_phone_folder_button")
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Text("Выбрать папку")
+                        Icon(
+                            imageVector = Icons.Default.FolderOpen,
+                            contentDescription = null,
+                            tint = InkCharcoal,
+                            modifier = Modifier.size(54.dp)
+                        )
+                        Text(
+                            text = "Выберите папку телефона",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = InkCharcoal,
+                            textAlign = TextAlign.Center
+                        )
+                        Text(
+                            text = "Подключите «Загрузки», «Документы» или любую папку на телефоне для прямого переноса файлов на USB-флешку.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = InkSlateGray,
+                            textAlign = TextAlign.Center
+                        )
+                        Button(
+                            onClick = onPickPhoneSafFolder,
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = GraphitePrimary,
+                                contentColor = Color.White
+                            ),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(48.dp)
+                                .testTag("pick_phone_folder_button")
+                        ) {
+                            Text("Выбрать папку")
+                        }
                     }
                 }
             }
@@ -147,7 +204,9 @@ fun PhoneExplorerScreen(
                 preferences = preferences,
                 clipboard = clipboard,
                 isUsb = false,
-                statusBadge = if (phoneRootMode == PhoneRootMode.WORKSPACE) "Встроенный буфер" else "Папка телефона",
+                statusBadge = if (phoneRootMode == PhoneRootMode.WORKSPACE) "Буфер" else "Папка",
+                quickSendLabel = if (isUsbConnected) "Отправить на USB-флешку" else null,
+                onQuickSend = onQuickSendToUsb,
                 onNavigateUp = onNavigateUp,
                 onCrumbClick = onCrumbClick,
                 onSearchChange = onSearchChange,
@@ -173,6 +232,58 @@ fun PhoneExplorerScreen(
                 showAddSheet = showAddSheet,
                 onDismissAddSheet = onDismissAddSheet,
                 modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun GlassModePill(
+    icon: ImageVector,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    backdrop: com.kyant.backdrop.backdrops.LayerBackdrop?,
+    modifier: Modifier = Modifier
+) {
+    val shape = RoundedCornerShape(16.dp)
+    Box(
+        modifier = modifier
+            .height(48.dp)
+            .liquidGlass(
+                backdrop = backdrop,
+                shape = shape,
+                fillAlpha = if (selected) 0.72f else 0.36f,
+                blurRadius = 6.dp,
+                useLens = selected,
+                refractionHeight = 10.dp,
+                refractionAmount = 18.dp,
+                borderAlpha = if (selected) 1f else 0.65f
+            )
+            .clip(shape)
+            .clickable(onClick = onClick)
+            .padding(horizontal = 10.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = InkCharcoal,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge.copy(
+                    fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium
+                ),
+                color = if (selected) InkCharcoal else InkSlateGray,
+                maxLines = 1,
+                softWrap = false,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

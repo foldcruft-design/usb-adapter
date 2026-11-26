@@ -552,6 +552,52 @@ class FileManagerViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    fun quickTransferToOtherPane(fromTarget: PaneTarget, explicitNodes: List<FileNode>? = null) {
+        val sourcePane = paneFlow(fromTarget).value
+        val destTarget = if (fromTarget == PaneTarget.PHONE) PaneTarget.USB else PaneTarget.PHONE
+        val destPane = paneFlow(destTarget).value
+        val destCrumb = destPane.currentBreadcrumb
+
+        if (destTarget == PaneTarget.USB && (destPane.rootTreeUri == null || destCrumb == null)) {
+            _uiEvents.tryEmit(OneShotUiEvent.ShowMessage("Сначала подключите USB-флешку и откройте её"))
+            return
+        }
+        if (destCrumb == null) return
+
+        val nodes = explicitNodes ?: sourcePane.files.filter { it.id in sourcePane.selectedIds }
+        if (nodes.isEmpty()) return
+
+        activeTransferJob?.cancel()
+        activeTransferJob = viewModelScope.launch {
+            val result = fileRepo.copyOrMoveNodes(
+                sources = nodes,
+                sourceTreeUri = sourcePane.rootTreeUri,
+                targetTreeUri = destPane.rootTreeUri,
+                targetParentDocId = destCrumb.documentId,
+                targetLocalDir = destCrumb.localPath?.let { File(it) },
+                isMove = false,
+                onProgress = { progress -> _transferProgress.value = progress }
+            )
+            _transferProgress.value = TransferProgress()
+            result.onSuccess { count ->
+                clearSelection(fromTarget)
+                val destLabel = if (destTarget == PaneTarget.USB) "на флешку" else "в буфер телефона"
+                usbMonitor.appendLog(
+                    "Отправлено $destLabel: $count",
+                    destCrumb.name,
+                    EventLevel.SUCCESS
+                )
+                refreshPane(PaneTarget.USB)
+                refreshPane(PaneTarget.PHONE)
+                _uiEvents.tryEmit(OneShotUiEvent.ShowMessage("Готово: отправлено $destLabel ($count)"))
+            }.onFailure { err ->
+                _uiEvents.tryEmit(
+                    OneShotUiEvent.ShowMessage(err.localizedMessage ?: "Ошибка переноса")
+                )
+            }
+        }
+    }
+
     fun importExternalUris(target: PaneTarget, uris: List<Uri>) {
         if (uris.isEmpty()) return
         val pane = paneFlow(target).value

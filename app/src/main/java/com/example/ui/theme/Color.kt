@@ -2,41 +2,33 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Precision Slate & Electric Cyan Hardware Palette
-val SlateDeep = Color(0xFF090F1A)
-val SlateBackground = Color(0xFF0F172A)
-val SlateSurface = Color(0xFF162033)
-val SlateSurfaceHigh = Color(0xFF1E293B)
-val SlateSurfaceHighest = Color(0xFF283548)
-val SlateOutline = Color(0xFF334155)
-val SlateOutlineSubtle = Color(0xFF1E293B)
+// Pure Silver-Gray & White Liquid Glass Palette
+val SilverBgTop = Color(0xFFEDF0F5)
+val SilverBgMid = Color(0xFFE1E5ED)
+val SilverBgBottom = Color(0xFFF5F6FA)
 
-val ElectricCyan = Color(0xFF22D3EE)
-val ElectricCyanDark = Color(0xFF0891B2)
-val ElectricCyanContainer = Color(0xFF0E3A4D)
-val OnElectricCyan = Color(0xFF042029)
+val GlassWhiteFill = Color(0xFFFFFFFF)
+val GlassSurfaceTint = Color(0xFFF3F5F8)
+val GlassBorderLight = Color(0xFFFFFFFF)
+val GlassBorderSubtle = Color(0xFFD2D7E0)
 
-val IndigoAccent = Color(0xFF818CF8)
-val IndigoContainer = Color(0xFF1E2547)
+// Dark gray text & icons (never harsh pure black)
+val InkCharcoal = Color(0xFF1C1C1E)
+val InkSlateGray = Color(0xFF5C6068)
+val InkMutedGray = Color(0xFF8A8F99)
 
-val WarmAmber = Color(0xFFF59E0B)
-val WarmAmberContainer = Color(0xFF3D2808)
+// Neutral graphite & cool silver accents
+val GraphitePrimary = Color(0xFF2C2F36)
+val GraphiteSecondary = Color(0xFF4F5663)
+val SteelAccent = Color(0xFF6B778D)
+val SilverPillBg = Color(0xFFDCE1EA)
 
-val EmeraldReady = Color(0xFF10B981)
-val EmeraldContainer = Color(0xFF083828)
+// Subtle semantic indicators harmonized with gray glass
+val EmeraldReady = Color(0xFF1F7A53)
+val EmeraldContainer = Color(0xFFDFF3EA)
 
-val CoralDanger = Color(0xFFF43F5E)
-val CoralContainer = Color(0xFF450F1C)
+val WarmAmber = Color(0xFFA66316)
+val WarmAmberContainer = Color(0xFFFAECD8)
 
-val TextPrimaryDark = Color(0xFFF1F5F9)
-val TextSecondaryDark = Color(0xFF94A3B8)
-
-// Crisp Light Theme Counterpart
-val LightBackground = Color(0xFFF4F7FB)
-val LightSurface = Color(0xFFFFFFFF)
-val LightSurfaceVariant = Color(0xFFE8EFF7)
-val LightOutline = Color(0xFFCBD5E1)
-val CyanPrimaryLight = Color(0xFF0284C7)
-val CyanContainerLight = Color(0xFFE0F2FE)
-val TextPrimaryLight = Color(0xFF0F172A)
-val TextSecondaryLight = Color(0xFF475569)
+val CoralDanger = Color(0xFFC53048)
+val CoralContainer = Color(0xFFFBE4E8)
